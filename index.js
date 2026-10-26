@@ -6,20 +6,16 @@ import dns from "node:dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const app= express()
-app.use(cors())
+app.use(cors({ origin:"https://wanderlast-wine.vercel.app"}))
 app.use(express.json());
-const PORT = 8000
+const PORT = process.env.PORT || 8000;
 
 
 const client = new MongoClient(process.env.URI);
 export async function connectToMongoDB() {
-  try {
     await client.connect();
     console.log("You successfully connected to MongoDB!");
     return client;
-  } catch (err) {
-    console.dir(err);
-  }
 }
 
  const mongoclient = await connectToMongoDB();
@@ -106,6 +102,6 @@ app.delete('/destinations/:id', async(req,res)=>{
     res.json(res3)
 })
 
-app.listen(PORT, ()=>{
-    console.log(`Server is running on this port ${PORT}`)
-})
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running on port ${PORT}`);
+});
