@@ -8,7 +8,7 @@ dns.setServers(["8.8.8.8", "1.1.1.1"]);
 const app= express()
 app.use(cors({ origin:"https://wanderlast-wine.vercel.app"}))
 app.use(express.json());
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT;
 
 
 const client = new MongoClient(process.env.URI);
