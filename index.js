@@ -6,7 +6,23 @@ import dns from "node:dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const app= express()
-app.use(cors({ origin:"https://wanderlast-wine.vercel.app"}))
+const allowedOrigins = [
+  'https://wanderlast-wine.vercel.app',
+  'https://wanderlast-118ddopts-shakibs-projects-6a0fb07d.vercel.app',
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked origin: ${origin}`));
+    },
+  })
+);
+
 app.use(express.json());
 const PORT = process.env.PORT;
 
