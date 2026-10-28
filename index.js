@@ -26,14 +26,6 @@ app.use(
 app.use(express.json());
 const PORT = process.env.PORT;
 
-const verify = (req, res, next) => {
-    const authverify = req.headers.authorization
-    // console.log(authverify)
-    if (authverify !== "user logged in") {
-        res.status(404).send({ message: "Unauthorized!!" })
-    }
-    next();
-}
 const client = new MongoClient(process.env.URI);
 export async function connectToMongoDB() {
     await client.connect();
@@ -44,6 +36,17 @@ export async function connectToMongoDB() {
 const mongoclient = await connectToMongoDB();
 const db = mongoclient.db("wanderlast")
 const destinationCollection = db.collection("detination")
+
+
+const verify = (req, res, next) => {
+    const authverify = req.headers.authorization
+    // console.log(authverify)
+    if (authverify !== "user logged in") {
+        return res.status(404).send({ message: "Unauthorized!!" })
+    }
+    next();
+}
+
 
 app.get('/', (req, res) => {
     res.send(
@@ -58,7 +61,7 @@ app.post('/add-destination', async (req, res) => {
     res.send(result)
 })
 
-app.get('/destinations', async (req, res) => {
+app.get('/destinations', verify, async (req, res) => {
     const result = await destinationCollection.find().toArray()
     res.send(result)
 })
