@@ -5,22 +5,22 @@ import cors from 'cors';
 import dns from "node:dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
-const app= express()
+const app = express()
 const allowedOrigins = [
-  'https://wanderlast-wine.vercel.app',
-  'https://wanderlast-118ddopts-shakibs-projects-6a0fb07d.vercel.app',
+    'https://wanderlast-wine.vercel.app',
+    'https://wanderlast-118ddopts-shakibs-projects-6a0fb07d.vercel.app',
 ];
 
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+    cors({
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
 
-      return callback(new Error(`CORS blocked origin: ${origin}`));
-    },
-  })
+            return callback(new Error(`CORS blocked origin: ${origin}`));
+        },
+    })
 );
 
 app.use(express.json());
@@ -34,40 +34,46 @@ export async function connectToMongoDB() {
     return client;
 }
 
- const mongoclient = await connectToMongoDB();
- const db= mongoclient.db("wanderlast")
- const destinationCollection = db.collection("detination")
+const mongoclient = await connectToMongoDB();
+const db = mongoclient.db("wanderlast")
+const destinationCollection = db.collection("detination")
 
-app.get('/',(req,res)=>{
+app.get('/', (req, res) => {
     res.send(
         'WElcome to first api!!'
     )
 })
 
-app.post('/add-destination', async(req, res)=>{
+app.post('/add-destination', async (req, res) => {
     const data = req.body
     const result = await destinationCollection.insertOne(data)
     console.log(result)
     res.send(result)
 })
 
-app.get('/destinations', async(req,res)=>{
+app.get('/destinations', async (req, res) => {
     const result = await destinationCollection.find().toArray()
     res.send(result)
 })
 
-app.get('/destinations/:id', async(req, res)=>{
-    const {id} = req.params
-    const res1 = await destinationCollection.findOne({_id: new ObjectId(id)})
-    res.send({res1})
+app.get('/destinations/:id', async (req, res) => {
+
+    const authverify = req.headers.authorization
+    console.log(authverify)
+    if (authverify !== "user logged in") {
+        res.status(404).send("Unauthorized!!")
+    }
+    const { id } = req.params
+    const res1 = await destinationCollection.findOne({ _id: new ObjectId(id) })
+    res.send({ res1 })
 })
 
-app.patch('/destinations/:id', async(req, res)=>{
-    const {id} = req.params
+app.patch('/destinations/:id', async (req, res) => {
+    const { id } = req.params
     const Update = req.body
     const res2 = await destinationCollection.updateOne(
-        {_id: new ObjectId(id)},
-        {$set:Update},
+        { _id: new ObjectId(id) },
+        { $set: Update },
     )
     res.json(res2)
 })
@@ -110,14 +116,14 @@ app.get('/stats', async (req, res) => {
     }
 })
 
-app.delete('/destinations/:id', async(req,res)=>{
-    const {id} = req.params
+app.delete('/destinations/:id', async (req, res) => {
+    const { id } = req.params
     const res3 = await destinationCollection.deleteOne(
-        {_id:new ObjectId(id)}
+        { _id: new ObjectId(id) }
     )
     res.json(res3)
 })
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
